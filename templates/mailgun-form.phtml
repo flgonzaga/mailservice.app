@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Mailgun Test</title>
+</head>
+<body>
+
+	<h2><?php echo $message; ?></h2>
+
+	<form method="post" action="/mailgun/send">
+		
+		<input type="text" name="from" value="" placeholder="From"><br>
+		
+		<input type="text" name="to" value="" placeholder="To"><br>
+		
+		<input type="text" name="subject" value="" placeholder="Subject"><br>
+		
+		<input type="text" name="message" value="" placeholder="Message"><br>
+
+		<button type="submit">Send with Mailgun</button>
+	</form>
+</body>
+</html>
