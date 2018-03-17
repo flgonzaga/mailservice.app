@@ -28,5 +28,8 @@ require __DIR__ . '/../src/middleware.php';
 // Register routes
 require __DIR__ . '/../src/routes.php';
 
+//Mailgun Auth
+require __DIR__ . '/../auth/mailgun.php';
+
 // Run app
 $app->run();

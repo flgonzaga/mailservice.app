@@ -16,8 +16,46 @@ class Mailgun
 	public function home($request, $response, $args) {
 	    // your code
 	    //$this->container->logger->info("Mailgun Controller is working");
-	    $args['name'] = ' - Mailgun is working';
 	    return $this->container->renderer->render($response, 'mailgun-form.phtml', $args);
+	}
+
+	/**
+	* Mailgun Authentication 
+	*/
+	private function apiAuth()
+	{
+		$httpClient = new \GuzzleHttp\Client([
+		    'verify' => false,
+		]);
+		$httpAdapter = new \Http\Adapter\Guzzle6\Client($httpClient);
+
+	    $mailgun = new \Mailgun\Mailgun(MAILGUN_API_KEY, $httpAdapter);
+	    return $mailgun;
+	}
+
+	/**
+	* Check if credential is enable
+	*/
+	private function checkCredentials(string $domain, string $credential)
+	{
+		try {
+			$mailgun = $this->apiAuth();
+			$result = $mailgun->get("domains/$domain/credentials");
+			foreach ($result->http_response_body->items as $key => $value) 
+			{
+				if ($value->login == $credential)
+				{
+					return true;
+				} 
+				else 
+				{
+					return false;
+				}
+			}
+			return $response;
+		} catch (\Exception $e) {
+			return false;
+		}
 	}
 
 	/**
@@ -27,13 +65,13 @@ class Mailgun
 		try {
 	    	if ($request->getMethod() == 'POST')
 	    	{
-	    		$httpClient = new \GuzzleHttp\Client([
-				    'verify' => false,
-				]);
-				$httpAdapter = new \Http\Adapter\Guzzle6\Client($httpClient);
-
-			    $mailgun = new \Mailgun\Mailgun('YOUR_API_KEY', $httpAdapter);
+	    		$mailgun = $this->apiAuth();
 				$domain = $request->getParam('domain');
+				$credential = $request->getParam('credential');
+				if (!$this->checkCredentials($domain, $credential))
+				{
+					throw new \Exception("Error: Invalid credentials", 1);
+				}
 
 				$args = array(
 				    'from'    => $request->getParam('from'),
@@ -65,8 +103,10 @@ class Mailgun
 	    	}
 		} catch (HttpException $e) {
 		    return $response->withStatus(400)->withJson($e->getMessage());
-		} catch (Exception $e) {
+		} catch (\Exception $e) {
 			return $response->withStatus(500)->withJson($e->getMessage());
 		} 
 	}
+
+
 }
