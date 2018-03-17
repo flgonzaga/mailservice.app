@@ -9,11 +9,13 @@ class Mailgun
 	protected $container;
 
 	// constructor receives container instance
-	public function __construct(ContainerInterface $container) {
+	public function __construct(ContainerInterface $container) 
+	{
 	   $this->container = $container;
 	}
 
-	public function home($request, $response, $args) {
+	public function home($request, $response, $args) 
+	{
 	    // your code
 	    //$this->container->logger->info("Mailgun Controller is working");
 	    return $this->container->renderer->render($response, 'mailgun-form.phtml', $args);
@@ -61,7 +63,8 @@ class Mailgun
 	/**
 	* Sending a simple message
 	*/
-	public function send($request, $response, $args) {
+	public function send($request, $response, $args) 
+	{
 		try {
 	    	if ($request->getMethod() == 'POST')
 	    	{
