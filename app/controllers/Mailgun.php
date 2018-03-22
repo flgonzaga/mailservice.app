@@ -42,21 +42,21 @@ class Mailgun
 	{
 		try {
 			$mailgun = $this->apiAuth();
+			
 			$result = $mailgun->get("domains/$domain/credentials");
+
 			foreach ($result->http_response_body->items as $key => $value) 
 			{
 				if ($value->login == $credential)
 				{
 					return true;
-				} 
-				else 
-				{
-					return false;
 				}
 			}
-			return $response;
-		} catch (\Exception $e) {
 			return false;
+		} catch (HttpException $e) {
+		    return $response->withStatus(400)->withJson($e->getMessage());
+		} catch (\Exception $e) {
+			return $response->withStatus(400)->withJson($e->getMessage());
 		}
 	}
 
@@ -73,14 +73,14 @@ class Mailgun
 				$credential = $request->getParam('credential');
 				if (!$this->checkCredentials($domain, $credential))
 				{
-					throw new \Exception("Error: Invalid credentials", 1);
+					return $response->withStatus(400)->withJson("Error: Invalid credentials.");
 				}
 
 				$args = array(
 				    'from'    => $request->getParam('from'),
 				    'to'      => $request->getParam('to'),
 				    'subject' => $request->getParam('subject'),
-				    'html'    => $request->getParam('message') // text or html type
+				    'html'    => $request->getParam('message'), // text or html type
 				);
 				if ($request->getParam('cc'))
 				{
@@ -94,10 +94,6 @@ class Mailgun
 				# Make the call to the client.
 				$result = $mailgun->sendMessage($domain, $args);
 	    		
-				// $args['id'] = $result->http_response_body->id;
-				// $args['message'] = $result->http_response_body->message;
-				// $args['http_response_code'] = $result->http_response_body->http_response_code;
-
 		    	return $response->withJson($result);
 	    	}
 	    	else
@@ -107,7 +103,7 @@ class Mailgun
 		} catch (HttpException $e) {
 		    return $response->withStatus(400)->withJson($e->getMessage());
 		} catch (\Exception $e) {
-			return $response->withStatus(500)->withJson($e->getMessage());
+			return $response->withStatus(400)->withJson($e->getMessage());
 		} 
 	}
 
